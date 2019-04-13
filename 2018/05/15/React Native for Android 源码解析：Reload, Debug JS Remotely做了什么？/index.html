@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-icon-180x180.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-96x96.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-32x32.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Android,React Native,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Read the fucking ♂ source code" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="Reload, debug js remotely罪恶滔天，弄的百姓怨声载道最近使用0.54.0版本开发有个调试的bug非常恶心，debug js remotely总是抛1234DeltaPatcher.js:58 Uncaught (in promise) Error: DeltaPatcher should receive a fresh Delta when being initializ">
+<meta name="keywords" content="Android,React Native">
+<meta property="og:type" content="article">
+<meta property="og:title" content="React Native for Android 源码解析：Reload, Debug JS Remotely具体做了什么？">
+<meta property="og:url" content="http://yoursite.com/2018/05/15/React Native for Android 源码解析：Reload, Debug JS Remotely做了什么？/index.html">
+<meta property="og:site_name" content="Read the fucking ♂ source code">
+<meta property="og:description" content="Reload, debug js remotely罪恶滔天，弄的百姓怨声载道最近使用0.54.0版本开发有个调试的bug非常恶心，debug js remotely总是抛1234DeltaPatcher.js:58 Uncaught (in promise) Error: DeltaPatcher should receive a fresh Delta when being initializ">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/2018/05/15/React%20Native%20for%20Android%20源码解析：Reload,%20Debug%20JS%20Remotely做了什么？/title_background.jpeg">
+<meta property="og:updated_time" content="2019-03-28T13:06:27.556Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="React Native for Android 源码解析：Reload, Debug JS Remotely具体做了什么？">
+<meta name="twitter:description" content="Reload, debug js remotely罪恶滔天，弄的百姓怨声载道最近使用0.54.0版本开发有个调试的bug非常恶心，debug js remotely总是抛1234DeltaPatcher.js:58 Uncaught (in promise) Error: DeltaPatcher should receive a fresh Delta when being initializ">
+<meta name="twitter:image" content="http://yoursite.com/2018/05/15/React%20Native%20for%20Android%20源码解析：Reload,%20Debug%20JS%20Remotely做了什么？/title_background.jpeg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/05/15/React Native for Android 源码解析：Reload, Debug JS Remotely做了什么？/">
+
+
+
+
+
+  <title>React Native for Android 源码解析：Reload, Debug JS Remotely具体做了什么？ | Read the fucking ♂ source code</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Read the fucking ♂ source code</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">每天学习新姿势</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-首页">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-标签">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-分类">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-归档">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-关于">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/05/15/React Native for Android 源码解析：Reload, Debug JS Remotely做了什么？/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Yori Zhao(赵佳康)">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Read the fucking ♂ source code">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">React Native for Android 源码解析：Reload, Debug JS Remotely具体做了什么？</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-15T18:54:54+08:00">
+                2018-05-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术/" itemprop="url" rel="index">
+                    <span itemprop="name">技术</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/05/15/React Native for Android 源码解析：Reload, Debug JS Remotely做了什么？/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count gitment-comments-count" data-xid="/2018/05/15/React Native for Android 源码解析：Reload, Debug JS Remotely做了什么？/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <img src="/2018/05/15/React%20Native%20for%20Android%20源码解析：Reload,%20Debug%20JS%20Remotely做了什么？/title_background.jpeg" title="忽悠妹纸买的splatoon不会玩然后甩给我了，美滋滋">
+<h2 id="Reload-debug-js-remotely罪恶滔天，弄的百姓怨声载道"><a href="#Reload-debug-js-remotely罪恶滔天，弄的百姓怨声载道" class="headerlink" title="Reload, debug js remotely罪恶滔天，弄的百姓怨声载道"></a>Reload, debug js remotely罪恶滔天，弄的百姓怨声载道</h2><p>最近使用0.54.0版本开发有个调试的bug非常恶心，debug js remotely总是抛<br><figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">DeltaPatcher<span class="selector-class">.js</span>:<span class="number">58</span> Uncaught (<span class="keyword">in</span> promise) Error: DeltaPatcher should receive <span class="selector-tag">a</span> fresh Delta when being initialized</span><br><span class="line">                                                       at DeltaPatcher<span class="selector-class">.applyDelta</span> (DeltaPatcher<span class="selector-class">.js</span>:<span class="number">58</span>)</span><br><span class="line">                                                       at deltaUrlToBlobUrl (deltaUrlToBlobUrl<span class="selector-class">.js</span>:<span class="number">34</span>)</span><br><span class="line">                                                       at &lt;anonymous&gt;</span><br></pre></td></tr></table></figure></p>
+<p>想再次debug就得杀掉进程重新打开，官方解释在0.55版本会修复此问题，看了下pr改动都是js代码，随即更新版本修复此问题。若想以后碰到类似框架性的问题，想要自己能有排错纠错能力，还是老老实实啃源码吧</p>
+<a id="more"></a>
+<h2 id="Reload"><a href="#Reload" class="headerlink" title="Reload"></a>Reload</h2><p>首先看看Reload，先从<code>Activity</code>下手，初始demo里<code>MainActivity</code>继承了<code>ReactActivity</code>，RN工程的初始化，加载jsbundle的触发都在这个<code>ReactActivity</code>中，然后具体业务逻辑又交给了它的代理类<code>ReactActivityDelegate</code>，里面做了初始化RN框架逻辑，框架初始化的流程先不管，主要看看reload流程</p>
+<h3 id="onKeyUp"><a href="#onKeyUp" class="headerlink" title="onKeyUp"></a>onKeyUp</h3><figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">public boolean onKeyUp<span class="params">(int keyCode, KeyEvent event)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> <span class="params">(getReactNativeHost()</span><span class="string">.hasInstance</span><span class="params">()</span> &amp;&amp; getReactNativeHost<span class="params">()</span><span class="string">.getUseDeveloperSupport</span><span class="params">()</span>) &#123;</span><br><span class="line">      <span class="keyword">if</span> <span class="params">(<span class="attr">keyCode</span> == KeyEvent.KEYCODE_MENU)</span> &#123;</span><br><span class="line">        getReactNativeHost<span class="params">()</span><span class="string">.getReactInstanceManager</span><span class="params">()</span><span class="string">.showDevOptionsDialog</span><span class="params">()</span>;</span><br><span class="line">        return <span class="literal">true</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      boolean didDoubleTapR = Assertions.assertNotNull<span class="params">(mDoubleTapReloadRecognizer)</span></span><br><span class="line">        <span class="string">.didDoubleTapR</span><span class="params">(keyCode, getPlainActivity()</span><span class="string">.getCurrentFocus</span><span class="params">()</span>);</span><br><span class="line">      <span class="keyword">if</span> <span class="params">(didDoubleTapR)</span> &#123;</span><br><span class="line">        getReactNativeHost<span class="params">()</span><span class="string">.getReactInstanceManager</span><span class="params">()</span><span class="string">.getDevSupportManager</span><span class="params">()</span><span class="string">.handleReloadJS</span><span class="params">()</span>;</span><br><span class="line">        return <span class="literal">true</span>;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    return <span class="literal">false</span>;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p><code>ReactActivity</code>中侦听了物理按键，在keyCode为82即menu按键的时候，获取了RN主要的管理类<code>ReactInstanceManager</code>，然后调起了调试框<code>DevOptionsDialog</code>，具体业务逻辑在<code>DevSupportManagerImpl</code>这个类中，还可以看到有另外一个doubleTapR操作可以直接进行reload jsbundle，继续跟到<code>DevSupportManagerImpl</code>中，这里定义了调试dialog，跟到<code>R.string.catalyst_reloadjs</code>这个事件，触发了<code>handleReloadJS</code>，reload的流程入口就在这个方法中</p>
+<h3 id="handleReloadJS"><a href="#handleReloadJS" class="headerlink" title="handleReloadJS"></a>handleReloadJS</h3><figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line">  <span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">handleReloadJS</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    UiThreadUtil.assertOnUiThread();</span><br><span class="line"></span><br><span class="line">    ReactMarker.logMarker(</span><br><span class="line">        ReactMarkerConstants.RELOAD,</span><br><span class="line">        mDevSettings.getPackagerConnectionSettings().getDebugServerHost());</span><br><span class="line"></span><br><span class="line">    <span class="comment">// dismiss redbox if exists</span></span><br><span class="line">    hideRedboxDialog();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (mDevSettings.isRemoteJSDebugEnabled()) &#123;</span><br><span class="line">      PrinterHolder.getPrinter()</span><br><span class="line">          .logMessage(ReactDebugOverlayTags.RN_CORE, <span class="string">"RNCore: load from Proxy"</span>);</span><br><span class="line">      mDevLoadingViewController.showForRemoteJSEnabled();</span><br><span class="line">      mDevLoadingViewVisible = <span class="keyword">true</span>;</span><br><span class="line">      reloadJSInProxyMode();</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      PrinterHolder.getPrinter()</span><br><span class="line">          .logMessage(ReactDebugOverlayTags.RN_CORE, <span class="string">"RNCore: load from Server"</span>);</span><br><span class="line">      String bundleURL =</span><br><span class="line">        mDevServerHelper.getDevServerBundleURL(Assertions.assertNotNull(mJSAppBundleName));</span><br><span class="line">      reloadJSFromServer(bundleURL);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到这个方法主要是在取bundleURL，还区分了debug js remotely模式，可以看到这里的<code>mJSAppBundleName</code>是在构造函里数获取的，然后构造函数用IDE的函数跳转功能并不能找到在哪里构造的，仔细观察<code>DevSupportManagerImpl</code>的接口<code>DevSupportManager</code>，可以看到在<code>DevSupportManagerFactory</code>这个工厂类中有使用，这里是用的反射进行构造的<br><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> DevSupportManager create(</span><br><span class="line">    Context applicationContext,</span><br><span class="line">    ReactInstanceManagerDevHelper reactInstanceManagerHelper,</span><br><span class="line">    <span class="comment">// 这个是mJSAppBundleName</span></span><br><span class="line">    <span class="meta">@Nullable</span> <span class="built_in">String</span> packagerPathForJSBundleName,</span><br><span class="line">    <span class="built_in">boolean</span> enableOnCreate,</span><br><span class="line">    <span class="meta">@Nullable</span> RedBoxHandler redBoxHandler,</span><br><span class="line">    <span class="meta">@Nullable</span> DevBundleDownloadListener devBundleDownloadListener,</span><br><span class="line">    int minNumShakes) &#123;</span><br><span class="line">    <span class="keyword">if</span> (!enableOnCreate) &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">new</span> DisabledDevSupportManager();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      <span class="comment">// ProGuard is surprisingly smart in this case and will keep a class if it detects a call to</span></span><br><span class="line">      <span class="comment">// Class.forName() with a static string. So instead we generate a quasi-dynamic string to</span></span><br><span class="line">      <span class="comment">// confuse it.</span></span><br><span class="line">      <span class="built_in">String</span> className =</span><br><span class="line">        <span class="keyword">new</span> StringBuilder(DEVSUPPORT_IMPL_PACKAGE)</span><br><span class="line">          .append(<span class="string">"."</span>)</span><br><span class="line">          .append(DEVSUPPORT_IMPL_CLASS)</span><br><span class="line">          .toString();</span><br><span class="line">      Class&lt;?&gt; devSupportManagerClass =</span><br><span class="line">        Class.forName(className);</span><br><span class="line">      Constructor <span class="keyword">constructor</span> =</span><br><span class="line">        devSupportManagerClass.getConstructor(<span class="params"></span></span><br><span class="line"><span class="params">          Context.<span class="keyword">class</span>,</span></span><br><span class="line"><span class="params">          ReactInstanceManagerDevHelper.<span class="keyword">class</span>,</span></span><br><span class="line"><span class="params">          <span class="built_in">String</span>.<span class="keyword">class</span>,</span></span><br><span class="line"><span class="params">          <span class="built_in">boolean</span>.<span class="keyword">class</span>,</span></span><br><span class="line"><span class="params">          RedBoxHandler.<span class="keyword">class</span>,</span></span><br><span class="line"><span class="params">          DevBundleDownloadListener.<span class="keyword">class</span>,</span></span><br><span class="line"><span class="params">          int.<span class="keyword">class</span></span>);</span><br><span class="line">      return (<span class="params">DevSupportManager</span>) <span class="keyword">constructor</span>.newInstance(<span class="params"></span></span><br><span class="line"><span class="params">        applicationContext,</span></span><br><span class="line"><span class="params">        reactInstanceManagerHelper,</span></span><br><span class="line"><span class="params">        packagerPathForJSBundleName,</span></span><br><span class="line"><span class="params">        <span class="literal">true</span>,</span></span><br><span class="line"><span class="params">        redBoxHandler,</span></span><br><span class="line"><span class="params">        devBundleDownloadListener,</span></span><br><span class="line"><span class="params">        minNumShakes</span>);</span><br><span class="line">    &#125; catch (<span class="params">Exception e</span>) &#123;</span><br><span class="line">      throw new RuntimeException(<span class="params"></span></span><br><span class="line"><span class="params">        "Requested enabled DevSupportManager, but DevSupportManagerImpl <span class="keyword">class</span> was not found" +</span></span><br><span class="line"><span class="params">          " or could not be created",</span></span><br><span class="line"><span class="params">        e</span>);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></p>
+<p>跟到最后可以发现是在<code>ReactNativeHost</code>这个抽象类的<code>getJSMainModuleName()</code>方法拿到的，这个方法可以给用户重写进行自定义，再回到<code>handleReloadJS</code>方法，拼接出来的bundleURL长这样<br><code>http://localhost:8081/index.delta?platform=android&amp;dev=true&amp;minify=false</code>，host就是我们本地Nodejs启动的服务器地址<br><figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">reloadJSFromServer</span><span class="params">(<span class="keyword">final</span> String bundleURL)</span> </span>&#123;</span><br><span class="line">    ReactMarker.logMarker(ReactMarkerConstants.DOWNLOAD_START);</span><br><span class="line"></span><br><span class="line">    mDevLoadingViewController.showForUrl(bundleURL);</span><br><span class="line">    mDevLoadingViewVisible = <span class="keyword">true</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">final</span> BundleDownloader.BundleInfo bundleInfo = <span class="keyword">new</span> BundleDownloader.BundleInfo();</span><br><span class="line">    <span class="comment">// 触发下载任务</span></span><br><span class="line">    mDevServerHelper.downloadBundleFromURL(</span><br><span class="line">        <span class="comment">// 侦听下载</span></span><br><span class="line">        <span class="keyword">new</span> DevBundleDownloadListener() &#123;</span><br><span class="line">          <span class="meta">@Override</span></span><br><span class="line">          <span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">onSuccess</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            mDevLoadingViewController.hide();</span><br><span class="line">            mDevLoadingViewVisible = <span class="keyword">false</span>;</span><br><span class="line">            <span class="keyword">synchronized</span> (DevSupportManagerImpl.<span class="keyword">this</span>) &#123;</span><br><span class="line">              mBundleStatus.isLastDownloadSucess = <span class="keyword">true</span>;</span><br><span class="line">              mBundleStatus.updateTimestamp = System.currentTimeMillis();</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (mBundleDownloadListener != <span class="keyword">null</span>) &#123;</span><br><span class="line">              mBundleDownloadListener.onSuccess();</span><br><span class="line">            &#125;</span><br><span class="line">            UiThreadUtil.runOnUiThread(</span><br><span class="line">                <span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">                  <span class="meta">@Override</span></span><br><span class="line">                  <span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                    ReactMarker.logMarker(ReactMarkerConstants.DOWNLOAD_END, bundleInfo.toJSONString());</span><br><span class="line">                    mReactInstanceManagerHelper.onJSBundleLoadedFromServer();</span><br><span class="line">                  &#125;</span><br><span class="line">                &#125;);</span><br><span class="line">          &#125;</span><br><span class="line"></span><br><span class="line">          <span class="meta">@Override</span></span><br><span class="line">          <span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">onProgress</span><span class="params">(@Nullable <span class="keyword">final</span> String status, @Nullable <span class="keyword">final</span> Integer done, @Nullable <span class="keyword">final</span> Integer total)</span> </span>&#123;</span><br><span class="line">            mDevLoadingViewController.updateProgress(status, done, total);</span><br><span class="line">            <span class="keyword">if</span> (mBundleDownloadListener != <span class="keyword">null</span>) &#123;</span><br><span class="line">              mBundleDownloadListener.onProgress(status, done, total);</span><br><span class="line">            &#125;</span><br><span class="line">          &#125;</span><br><span class="line"></span><br><span class="line">          <span class="meta">@Override</span></span><br><span class="line">          <span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">onFailure</span><span class="params">(<span class="keyword">final</span> Exception cause)</span> </span>&#123;</span><br><span class="line">            mDevLoadingViewController.hide();</span><br><span class="line">            mDevLoadingViewVisible = <span class="keyword">false</span>;</span><br><span class="line">            <span class="keyword">synchronized</span> (DevSupportManagerImpl.<span class="keyword">this</span>) &#123;</span><br><span class="line">              mBundleStatus.isLastDownloadSucess = <span class="keyword">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (mBundleDownloadListener != <span class="keyword">null</span>) &#123;</span><br><span class="line">              mBundleDownloadListener.onFailure(cause);</span><br><span class="line">            &#125;</span><br><span class="line">            FLog.e(ReactConstants.TAG, <span class="string">"Unable to download JS bundle"</span>, cause);</span><br><span class="line">            UiThreadUtil.runOnUiThread(</span><br><span class="line">                <span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">                  <span class="meta">@Override</span></span><br><span class="line">                  <span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                    <span class="keyword">if</span> (cause <span class="keyword">instanceof</span> DebugServerException) &#123;</span><br><span class="line">                      DebugServerException debugServerException = (DebugServerException) cause;</span><br><span class="line">                      showNewJavaError(debugServerException.getMessage(), cause);</span><br><span class="line">                    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                      showNewJavaError(</span><br><span class="line">                          mApplicationContext.getString(R.string.catalyst_jsload_error),</span><br><span class="line">                          cause);</span><br><span class="line">                    &#125;</span><br><span class="line">                  &#125;</span><br><span class="line">                &#125;);</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        mJSBundleTempFile,</span><br><span class="line">        bundleURL,</span><br><span class="line">        bundleInfo);</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></p>
+<p>这个方法触发了下载任务和下载成功后续的操作，跟进<code>mDevServerHelper.downloadBundleFromUR()</code>方法，走到<code>BundleDownloader</code>类的<code>downloadBundleFromURL</code>方法<br><figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> downloadBundleFromURL(</span><br><span class="line">      <span class="keyword">final</span> DevBundleDownloadListener callback,</span><br><span class="line">      <span class="keyword">final</span> <span class="keyword">File</span> outputFile,</span><br><span class="line">      <span class="keyword">final</span> String bundleURL,</span><br><span class="line">      <span class="keyword">final</span> @Nullable BundleInfo bundleInfo) &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 实例化okhttp请求</span></span><br><span class="line">    <span class="keyword">final</span> Request request =</span><br><span class="line">        <span class="keyword">new</span> Request.Builder()</span><br><span class="line">            .url(mBundleDeltaClient.toDeltaUrl(bundleURL))</span><br><span class="line">            <span class="comment">// <span class="doctag">FIXME:</span> there is a bug that makes MultipartStreamReader to never find the end of the</span></span><br><span class="line">            <span class="comment">// multipart message. This temporarily disables the multipart mode to work around it,</span></span><br><span class="line">            <span class="comment">// but</span></span><br><span class="line">            <span class="comment">// it means there is no progress bar displayed in the React Native overlay anymore.</span></span><br><span class="line">            <span class="comment">// .addHeader("Accept", "multipart/mixed")</span></span><br><span class="line">            .build();</span><br><span class="line">    mDownloadBundleFromURLCall = Assertions.assertNotNull(mClient.newCall(request));</span><br><span class="line">    mDownloadBundleFromURLCall.enqueue(</span><br><span class="line">        <span class="keyword">new</span> Callback() &#123;</span><br><span class="line">          @Override</span><br><span class="line">          <span class="keyword">public</span> <span class="keyword">void</span> onFailure(<span class="keyword">Call</span> <span class="keyword">call</span>, IOException e) &#123;</span><br><span class="line">            <span class="comment">// ignore callback if call was cancelled</span></span><br><span class="line">            <span class="keyword">if</span> (mDownloadBundleFromURLCall == <span class="keyword">null</span> || mDownloadBundleFromURLCall.isCanceled()) &#123;</span><br><span class="line">              mDownloadBundleFromURLCall = <span class="keyword">null</span>;</span><br><span class="line">              <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            mDownloadBundleFromURLCall = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">            callback.onFailure(</span><br><span class="line">                DebugServerException.makeGeneric(</span><br><span class="line">                    <span class="string">"Could not connect to development server."</span>,</span><br><span class="line">                    <span class="string">"URL: "</span> + <span class="keyword">call</span>.request().url().toString(),</span><br><span class="line">                    e));</span><br><span class="line">          &#125;</span><br><span class="line"></span><br><span class="line">          @Override</span><br><span class="line">          <span class="keyword">public</span> <span class="keyword">void</span> onResponse(<span class="keyword">Call</span> <span class="keyword">call</span>, <span class="keyword">final</span> Response response) <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">            <span class="comment">// ignore callback if call was cancelled</span></span><br><span class="line">            <span class="keyword">if</span> (mDownloadBundleFromURLCall == <span class="keyword">null</span> || mDownloadBundleFromURLCall.isCanceled()) &#123;</span><br><span class="line">              mDownloadBundleFromURLCall = <span class="keyword">null</span>;</span><br><span class="line">              <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            mDownloadBundleFromURLCall = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">final</span> String url = response.request().url().toString();</span><br><span class="line"></span><br><span class="line">            <span class="comment">// Make sure the result is a multipart response and parse the boundary.</span></span><br><span class="line">            String contentType = response.header(<span class="string">"content-type"</span>);</span><br><span class="line">            Pattern regex = Pattern.<span class="keyword">compile</span>(<span class="string">"multipart/mixed;.*boundary=\"([^\"]+)\""</span>);</span><br><span class="line">            Matcher match = regex.matcher(contentType);</span><br><span class="line">            <span class="keyword">try</span> (Response r = response) &#123;</span><br><span class="line">              <span class="keyword">if</span> (match.<span class="keyword">find</span>()) &#123;</span><br><span class="line">                processMultipartResponse(</span><br><span class="line">                  url, r, match.<span class="keyword">group</span>(<span class="number">1</span>), outputFile, bundleInfo, callback);</span><br><span class="line">              &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="comment">// In case the server doesn't support multipart/mixed responses, fallback to normal</span></span><br><span class="line">                <span class="comment">// download.</span></span><br><span class="line">                processBundleResult(</span><br><span class="line">                  url,</span><br><span class="line">                  r.code(),</span><br><span class="line">                  r.headers(),</span><br><span class="line">                  Okio.buffer(r.body().<span class="keyword">source</span>()),</span><br><span class="line">                  outputFile,</span><br><span class="line">                  bundleInfo,</span><br><span class="line">                  callback);</span><br><span class="line">              &#125;</span><br><span class="line">            &#125;</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></p>
+<p>先看看这个方法的形参</p>
+<ul>
+<li>DevBundleDownloadListener callback：jsbundle下载回调</li>
+<li>File outputFile：Bundle缓存地址，我这里具体为<br><code>/data/data/com.socketclientrn/files/ReactNativeDevBundle.js</code></li>
+<li>String bundleURL：下载jsbundle的URL</li>
+</ul>
+<p>再看函数具体逻辑，内部使用了okhttp进行下载，下载成功后，<code>onResponse</code>回调中对返回数据进行了缓存。<br><figure class="highlight armasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">private</span> void processBundleResult(</span><br><span class="line">      <span class="keyword">String </span>url,</span><br><span class="line">      int statusCode,</span><br><span class="line">      Headers headers,</span><br><span class="line">      <span class="keyword">BufferedSource </span><span class="keyword">body,</span></span><br><span class="line"><span class="keyword"> </span>     File outputFile,</span><br><span class="line">      <span class="keyword">BundleInfo </span><span class="keyword">bundleInfo,</span></span><br><span class="line"><span class="keyword"> </span>     DevBundleDownloadListener callback)</span><br><span class="line">      throws IOException &#123;</span><br><span class="line">    // Check for server errors. <span class="meta">If</span> the server error has the expected form, fail with more <span class="meta">info</span>.</span><br><span class="line">    <span class="meta">if</span> (statusCode != <span class="number">200</span>) &#123;</span><br><span class="line">      <span class="keyword">String </span><span class="keyword">bodyString </span>= <span class="keyword">body.readUtf8();</span></span><br><span class="line"><span class="keyword"> </span>     DebugServerException debugServerException = DebugServerException.parse(<span class="keyword">bodyString);</span></span><br><span class="line"><span class="keyword"> </span>     <span class="meta">if</span> (debugServerException != null) &#123;</span><br><span class="line">        callback.onFailure(debugServerException)<span class="comment">;</span></span><br><span class="line">      &#125; <span class="meta">else</span> &#123;</span><br><span class="line">        <span class="keyword">StringBuilder </span><span class="built_in">sb</span> = new <span class="keyword">StringBuilder();</span></span><br><span class="line"><span class="keyword"> </span>       <span class="built_in">sb</span>.append(<span class="string">"The development server returned response error code: "</span>).append(statusCode).append(<span class="string">"\n\n"</span>)</span><br><span class="line">          .append(<span class="string">"URL: "</span>).append(url).append(<span class="string">"\n\n"</span>)</span><br><span class="line">          .append(<span class="string">"Body:\n"</span>)</span><br><span class="line">          .append(<span class="keyword">bodyString);</span></span><br><span class="line"><span class="keyword"> </span>       callback.onFailure(new DebugServerException(<span class="built_in">sb</span>.toString()))<span class="comment">;</span></span><br><span class="line">      &#125;</span><br><span class="line">      return<span class="comment">;</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">if</span> (<span class="keyword">bundleInfo </span>!= null) &#123;</span><br><span class="line">      <span class="keyword">populateBundleInfo(url, </span>headers, <span class="keyword">bundleInfo);</span></span><br><span class="line"><span class="keyword"> </span>   &#125;</span><br><span class="line"></span><br><span class="line">    File tmpFile = new File(outputFile.getPath() + <span class="string">".tmp"</span>)<span class="comment">;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">boolean </span><span class="keyword">bundleUpdated;</span></span><br><span class="line"><span class="keyword"></span></span><br><span class="line"><span class="keyword"> </span>   <span class="meta">if</span> (<span class="keyword">BundleDeltaClient.isDeltaUrl(url)) </span>&#123;</span><br><span class="line">      // <span class="meta">If</span> the <span class="keyword">bundle </span>URL has the delta extension, we need to use the delta patching logic.</span><br><span class="line">      <span class="keyword">bundleUpdated </span>= mBundleDeltaClient.storeDeltaInFile(<span class="keyword">body, </span>tmpFile)<span class="comment">;</span></span><br><span class="line">    &#125; <span class="meta">else</span> &#123;</span><br><span class="line">      mBundleDeltaClient.reset()<span class="comment">;</span></span><br><span class="line">      <span class="keyword">bundleUpdated </span>= storePlainJSInFile(<span class="keyword">body, </span>tmpFile)<span class="comment">;</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">if</span> (<span class="keyword">bundleUpdated) </span>&#123;</span><br><span class="line">      // <span class="meta">If</span> we have received a new <span class="keyword">bundle </span>from the server, <span class="keyword">move </span><span class="keyword">it </span>to <span class="keyword">its </span>final destination.</span><br><span class="line">      <span class="meta">if</span> (!tmpFile.renameTo(outputFile)) &#123;</span><br><span class="line">        throw new IOException(<span class="string">"Couldn't rename "</span> + tmpFile + <span class="string">" to "</span> + outputFile)<span class="comment">;</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    callback.onSuccess()<span class="comment">;</span></span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></p>
+<p>内部具体的流操作使用了okio，具体缓存的时候在参数<code>outputFile</code>后面加了个<code>.tmp</code>然后进行存储，存储ok后回调<code>DevBundleDownloadListener</code>。<br>再回到<code>DevSupportManagerImpl</code>的<code>reloadJSFromServer</code>方法，可以在<code>onSuccess</code>回调中看到判空<code>mBundleDownloadListener</code>然后调用的逻辑，这个回调是初始化<code>DevSupportManagerImpl</code>传进来的，调用链跟到最后是在<code>ReactNativeHost</code>的<code>createReactInstanceManager</code>方法中构建<code>ReactInstanceManager</code>时传递的，这个方法开发者是可以重写的，提供给开发者侦听jsbundle下载是否成功与失败</p>
+<h3 id="createCachedBundleFromNetworkLoader"><a href="#createCachedBundleFromNetworkLoader" class="headerlink" title="createCachedBundleFromNetworkLoader"></a>createCachedBundleFromNetworkLoader</h3><figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="function">ReactInstanceManagerDevHelper <span class="title">createDevHelperInterface</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> ReactInstanceManagerDevHelper() &#123;</span><br><span class="line">      <span class="meta">@Override</span></span><br><span class="line">      <span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">onReloadWithJSDebugger</span><span class="params">(JavaJSExecutor.Factory jsExecutorFactory)</span> </span>&#123;</span><br><span class="line">        ReactInstanceManager.<span class="keyword">this</span>.onReloadWithJSDebugger(jsExecutorFactory);</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="meta">@Override</span></span><br><span class="line">      <span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">onJSBundleLoadedFromServer</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        ReactInstanceManager.<span class="keyword">this</span>.onJSBundleLoadedFromServer();</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="meta">@Override</span></span><br><span class="line">      <span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">toggleElementInspector</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        ReactInstanceManager.<span class="keyword">this</span>.toggleElementInspector();</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="meta">@Override</span></span><br><span class="line">      <span class="keyword">public</span> <span class="meta">@Nullable</span> <span class="function">Activity <span class="title">getCurrentActivity</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> ReactInstanceManager.<span class="keyword">this</span>.mCurrentActivity;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>跟着调用链，最后走到了<code>createCachedBundleFromNetworkLoader</code>方法里<br><figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> JSBundleLoader createCachedBundleFromNetworkLoader(</span><br><span class="line">      <span class="keyword">final</span> String sourceURL,</span><br><span class="line">      <span class="keyword">final</span> String cachedFileLocation) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> JSBundleLoader() &#123;</span><br><span class="line">      <span class="meta">@Override</span></span><br><span class="line">      <span class="keyword">public</span> <span class="function">String <span class="title">loadScript</span><span class="params">(CatalystInstanceImpl instance)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">          instance.loadScriptFromFile(cachedFileLocation, sourceURL, <span class="keyword">false</span>);</span><br><span class="line">          <span class="keyword">return</span> sourceURL;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">          <span class="keyword">throw</span> DebugServerException.makeGeneric(e.getMessage(), e);</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></p>
+<p><code>createCachedBundleFromNetworkLoader</code>构造完<code>JSBundleLoader</code>后，就开始调用<code>CatalystInstanceImpl</code>去加载jsbundle了，<code>CatalystInstance</code>是Java，C，JavaScript三端通信的入口。<br><figure class="highlight processing"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* package */</span> <span class="keyword">void</span> loadScriptFromFile(<span class="keyword">String</span> fileName, <span class="keyword">String</span> sourceURL, <span class="built_in">boolean</span> loadSynchronously) &#123;</span><br><span class="line">    mSourceURL = sourceURL;</span><br><span class="line">    jniLoadScriptFromFile(fileName, sourceURL, loadSynchronously);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">native</span> <span class="keyword">void</span> jniLoadScriptFromFile(<span class="keyword">String</span> fileName, <span class="keyword">String</span> sourceURL, <span class="built_in">boolean</span> loadSynchronously);</span><br></pre></td></tr></table></figure></p>
+<p>可以看到最终加载jsbundle是在C里面完成的</p>
+<h3 id="Reload总流程"><a href="#Reload总流程" class="headerlink" title="Reload总流程"></a>Reload总流程</h3><p>reload总的流程可以总结为：点击reload -&gt; <code>DevSupportManagerImpl</code>拼接URL，触发下载 -&gt; <code>BundleDownloader</code>请求服务器下载jsbundle -&gt; 回调<code>DevSupportManagerImpl</code> -&gt; 调用<code>CatalystInstanceImpl</code>通知C加载新的jsbundle</p>
+<h2 id="Debug-JS-Remotely"><a href="#Debug-JS-Remotely" class="headerlink" title="Debug JS Remotely"></a>Debug JS Remotely</h2><h3 id="onKeyUp-1"><a href="#onKeyUp-1" class="headerlink" title="onKeyUp"></a>onKeyUp</h3><p>先看看Debug JS Remotely的点击事件，<br><figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">options.put(</span><br><span class="line">        remoteJsDebugMenuItemTitle,</span><br><span class="line">        <span class="keyword">new</span> DevOptionHandler() &#123;</span><br><span class="line">          <span class="meta">@Override</span></span><br><span class="line">          <span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">onOptionSelected</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            mDevSettings.setRemoteJSDebugEnabled(!mDevSettings.isRemoteJSDebugEnabled());</span><br><span class="line">            handleReloadJS();</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;);</span><br></pre></td></tr></table></figure></p>
+<p>先设置反了一下<code>remote_js_debug</code>这个key，使用SharedPreference存储，然后就走到<code>handleReloadJS</code>方法里</p>
+<h3 id="handleReloadJS-1"><a href="#handleReloadJS-1" class="headerlink" title="handleReloadJS"></a>handleReloadJS</h3><figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">if (mDevSettings.isRemoteJSDebugEnabled()) &#123;</span><br><span class="line">      PrinterHolder.getPrinter()</span><br><span class="line">          .logMessage(ReactDebugOverlayTags.RN_CORE, <span class="string">"RNCore: load from Proxy"</span>)<span class="comment">;</span></span><br><span class="line">      mDevLoadingViewController.<span class="keyword">showForRemoteJSEnabled();</span></span><br><span class="line"><span class="keyword"> </span>     mDevLoadingViewVisible = true<span class="comment">;</span></span><br><span class="line">      reloadJSInProxyMode()<span class="comment">;</span></span><br><span class="line">    &#125; else &#123;</span><br><span class="line">      PrinterHolder.getPrinter()</span><br><span class="line">          .logMessage(ReactDebugOverlayTags.RN_CORE, <span class="string">"RNCore: load from Server"</span>)<span class="comment">;</span></span><br><span class="line">      String <span class="keyword">bundleURL </span>=</span><br><span class="line">        mDevServerHelper.getDevServerBundleURL(Assertions.assertNotNull(mJSAppBundleName))<span class="comment">;</span></span><br><span class="line">      reloadJSFromServer(<span class="keyword">bundleURL);</span></span><br><span class="line"><span class="keyword"> </span>   &#125;</span><br></pre></td></tr></table></figure>
+<p>这里区分了debug js remotely模式与普通开发模式，主要看看<code>reloadJSInProxyMode</code>方法<br><figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="function"><span class="keyword">void</span> <span class="title">reloadJSInProxyMode</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// When using js proxy, there is no need to fetch JS bundle as proxy executor will do that</span></span><br><span class="line">    <span class="comment">// anyway</span></span><br><span class="line">    mDevServerHelper.launchJSDevtools();</span><br><span class="line"></span><br><span class="line">    JavaJSExecutor.Factory factory = <span class="keyword">new</span> JavaJSExecutor.Factory() &#123;</span><br><span class="line">      <span class="meta">@Override</span></span><br><span class="line">      <span class="keyword">public</span> <span class="function">JavaJSExecutor <span class="title">create</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        WebsocketJavaScriptExecutor executor = <span class="keyword">new</span> WebsocketJavaScriptExecutor();</span><br><span class="line">        SimpleSettableFuture&lt;Boolean&gt; future = <span class="keyword">new</span> SimpleSettableFuture&lt;&gt;();</span><br><span class="line">        executor.connect(</span><br><span class="line">            mDevServerHelper.getWebsocketProxyURL(),</span><br><span class="line">            getExecutorConnectCallback(future));</span><br><span class="line">        <span class="comment">// TODO(t9349129) Don't use timeout</span></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">          future.get(<span class="number">90</span>, TimeUnit.SECONDS);</span><br><span class="line">          <span class="keyword">return</span> executor;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (ExecutionException e) &#123;</span><br><span class="line">          <span class="keyword">throw</span> (Exception) e.getCause();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException | TimeoutException e) &#123;</span><br><span class="line">          <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(e);</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">    mReactInstanceManagerHelper.onReloadWithJSDebugger(factory);</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></p>
+<p>先调用了<code>launchJSDevtools</code>方法，里面仅仅做了一个简单的request，URL为<br><code>http://localhost:8081/launch-js-devtools</code>，目的应该是打开调试网页，然后实例化了一个实现<code>JavaJSExecutor.Factory</code>接口的匿名类，<code>create</code>方法会在调用<code>recreateReactContextInBackground</code>方法里的子线程中调用，跟进到<code>connectInternal</code>方法<br><figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">void</span> connectInternal(</span><br><span class="line">      String webSocketServerUrl,</span><br><span class="line">      <span class="keyword">final</span> JSExecutorConnectCallback callback) &#123;</span><br><span class="line">    <span class="keyword">final</span> JSDebuggerWebSocketClient client = <span class="keyword">new</span> JSDebuggerWebSocketClient();</span><br><span class="line">    <span class="keyword">final</span> Handler timeoutHandler = <span class="keyword">new</span> Handler(Looper.getMainLooper());</span><br><span class="line">    client.connect(</span><br><span class="line">        webSocketServerUrl, <span class="keyword">new</span> JSDebuggerWebSocketClient.JSDebuggerCallback() &#123;</span><br><span class="line">          <span class="comment">// It's possible that both callbacks can fire on an error so make sure we only</span></span><br><span class="line">          <span class="comment">// dispatch results once to our callback.</span></span><br><span class="line">          <span class="keyword">private</span> <span class="keyword">boolean</span> didSendResult = <span class="keyword">false</span>;</span><br><span class="line"></span><br><span class="line">          <span class="meta">@Override</span></span><br><span class="line">          <span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">onSuccess</span><span class="params">(@Nullable String response)</span> </span>&#123;</span><br><span class="line">            client.prepareJSRuntime(</span><br><span class="line">                <span class="keyword">new</span> JSDebuggerWebSocketClient.JSDebuggerCallback() &#123;</span><br><span class="line">                  <span class="meta">@Override</span></span><br><span class="line">                  <span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">onSuccess</span><span class="params">(@Nullable String response)</span> </span>&#123;</span><br><span class="line">                    timeoutHandler.removeCallbacksAndMessages(<span class="keyword">null</span>);</span><br><span class="line">                    mWebSocketClient = client;</span><br><span class="line">                    <span class="keyword">if</span> (!didSendResult) &#123;</span><br><span class="line">                      callback.onSuccess();</span><br><span class="line">                      didSendResult = <span class="keyword">true</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                  &#125;</span><br><span class="line"></span><br><span class="line">                  <span class="meta">@Override</span></span><br><span class="line">                  <span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">onFailure</span><span class="params">(Throwable cause)</span> </span>&#123;</span><br><span class="line">                    timeoutHandler.removeCallbacksAndMessages(<span class="keyword">null</span>);</span><br><span class="line">                    <span class="keyword">if</span> (!didSendResult) &#123;</span><br><span class="line">                      callback.onFailure(cause);</span><br><span class="line">                      didSendResult = <span class="keyword">true</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                  &#125;</span><br><span class="line">                &#125;);</span><br><span class="line">          &#125;</span><br><span class="line"></span><br><span class="line">          <span class="meta">@Override</span></span><br><span class="line">          <span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">onFailure</span><span class="params">(Throwable cause)</span> </span>&#123;</span><br><span class="line">            timeoutHandler.removeCallbacksAndMessages(<span class="keyword">null</span>);</span><br><span class="line">            <span class="keyword">if</span> (!didSendResult) &#123;</span><br><span class="line">              callback.onFailure(cause);</span><br><span class="line">              didSendResult = <span class="keyword">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    timeoutHandler.postDelayed(</span><br><span class="line">        <span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">          <span class="meta">@Override</span></span><br><span class="line">          <span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            client.closeQuietly();</span><br><span class="line">            callback.onFailure(</span><br><span class="line">                <span class="keyword">new</span> WebsocketExecutorTimeoutException(</span><br><span class="line">                    <span class="string">"Timeout while connecting to remote debugger"</span>));</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        CONNECT_TIMEOUT_MS);</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></p>
+<p>这里使用了websocket与本地服务器进行连接，服务器URL为：<br><code>ws://localhost:8081/debugger-proxy?role=client</code>，<br>继续跟到<code>JSDebuggerWebSocketClient</code>的<code>connect</code>方法<br><figure class="highlight haxe"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> void connect(<span class="keyword">String</span> url, JSDebuggerCallback callback) &#123;</span><br><span class="line">    <span class="keyword">if</span> (mHttpClient != <span class="literal">null</span>) &#123;</span><br><span class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> <span class="type">IllegalStateException</span>(<span class="string">"JSDebuggerWebSocketClient is already initialized."</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    mConnectCallback = callback;</span><br><span class="line">    mHttpClient = <span class="keyword">new</span> <span class="type">OkHttpClient</span>.Builder()</span><br><span class="line">      .connectTimeout(<span class="number">10</span>, TimeUnit.SECONDS)</span><br><span class="line">      .writeTimeout(<span class="number">10</span>, TimeUnit.SECONDS)</span><br><span class="line">      .readTimeout(<span class="number">0</span>, TimeUnit.MINUTES) <span class="comment">// Disable timeouts for read</span></span><br><span class="line">      .build();</span><br><span class="line"></span><br><span class="line">    Request request = <span class="keyword">new</span> <span class="type">Request</span>.Builder().url(url).build();</span><br><span class="line">    mHttpClient.<span class="keyword">new</span><span class="type">WebSocket</span>(request, <span class="built_in">this</span>);</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></p>
+<p>这里是使用okhttp来和本地服务器进行长连接，建立起连接后可以看到<code>JSDebuggerWebSocketClient</code>里<code>onMessage</code>，<code>sendMessage</code>方法与服务器通信的逻辑。这里我们先回到<code>reloadJSInProxyMode</code>方法，跟到<code>onReloadWithJSDebugger</code>方法<br><figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">private void onReloadWithJSDebugger(<span class="keyword">JavaJSExecutor.Factory </span><span class="keyword">jsExecutorFactory) </span>&#123;</span><br><span class="line">    Log.d(ReactConstants.TAG, <span class="string">"ReactInstanceManager.onReloadWithJSDebugger()"</span>)<span class="comment">;</span></span><br><span class="line">    recreateReactContextInBackground(</span><br><span class="line">        new ProxyJavaScriptExecutor.Factory(<span class="keyword">jsExecutorFactory),</span></span><br><span class="line"><span class="keyword"> </span>       <span class="keyword">JSBundleLoader.createRemoteDebuggerBundleLoader(</span></span><br><span class="line"><span class="keyword"> </span>           mDevSupportManager.getJSBundleURLForRemoteDebugging(),</span><br><span class="line">            mDevSupportManager.getSourceUrl()))<span class="comment">;</span></span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></p>
+<p>这里逻辑与普通debug模式差不多，都是构造<code>JSBundleLoader</code>和<code>JavaScriptExecutorFactory</code>，跟到<code>createRemoteDebuggerBundleLoader</code>方法中</p>
+<h3 id="createRemoteDebuggerBundleLoader"><a href="#createRemoteDebuggerBundleLoader" class="headerlink" title="createRemoteDebuggerBundleLoader"></a>createRemoteDebuggerBundleLoader</h3><figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line">   * This loader <span class="keyword">is</span> used when proxy debugging <span class="keyword">is</span> enabled. In <span class="keyword">that</span> case there <span class="keyword">is</span> no point <span class="keyword">in</span> fetching</span><br><span class="line">   * <span class="keyword">the</span> bundle <span class="keyword">from</span> device <span class="keyword">as</span> remote executor will have <span class="keyword">to</span> do <span class="keyword">it</span> anyway.</span><br><span class="line">   */</span><br><span class="line">  public static JSBundleLoader createRemoteDebuggerBundleLoader(</span><br><span class="line">      final String proxySourceURL,</span><br><span class="line">      final String realSourceURL) &#123;</span><br><span class="line"><span class="built_in">    return</span> new JSBundleLoader() &#123;</span><br><span class="line">      @Override</span><br><span class="line">      public String loadScript(CatalystInstanceImpl instance) &#123;</span><br><span class="line">        instance.setSourceURLs(realSourceURL, proxySourceURL);</span><br><span class="line"><span class="built_in">        return</span> realSourceURL;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"> /**</span><br><span class="line">   * This API <span class="keyword">is</span> used <span class="keyword">in</span> situations <span class="keyword">where</span> <span class="keyword">the</span> JS bundle <span class="keyword">is</span> being executed <span class="keyword">not</span> <span class="keyword">on</span></span><br><span class="line">   * <span class="keyword">the</span> device, <span class="keyword">but</span> <span class="keyword">on</span> a host machine. In <span class="keyword">that</span> case, we must provide two source</span><br><span class="line">   * URLs <span class="keyword">for</span> <span class="keyword">the</span> JS bundle: One <span class="keyword">to</span> be used <span class="keyword">on</span> <span class="keyword">the</span> device, <span class="keyword">and</span> one <span class="keyword">to</span> be used <span class="keyword">on</span></span><br><span class="line">   * <span class="keyword">the</span> remote debugging machine.</span><br><span class="line">   *</span><br><span class="line">   * @param deviceURL A source URL <span class="keyword">that</span> <span class="keyword">is</span> accessible <span class="keyword">from</span> this device.</span><br><span class="line">   * @param remoteURL A source URL <span class="keyword">that</span> <span class="keyword">is</span> accessible <span class="keyword">from</span> <span class="keyword">the</span> remote machine</span><br><span class="line">   * executing <span class="keyword">the</span> JS.</span><br><span class="line">   */</span><br><span class="line">  /* package */ void setSourceURLs(String deviceURL, String remoteURL) &#123;</span><br><span class="line">    mSourceURL = deviceURL;</span><br><span class="line">    jniSetSourceURL(remoteURL);</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>可以从注释中看出，此时jsbundle也是从本地服务器下载的</p>
+<p>跳出逻辑看看JSBundleLoader，暴露了四个方法</p>
+<ul>
+<li><code>createAssetLoader</code> 从asset目录中创建loader</li>
+<li><code>createFileLoader</code> 从具体某个文件中创建loader</li>
+<li><code>createCachedBundleFromNetworkLoader</code> 从URL中加载</li>
+<li><p><code>createRemoteDebuggerBundleLoader</code> 同上</p>
+<p>所以加载JSBundle可以归类为以上三种方式</p>
+</li>
+</ul>
+<h2 id="finally"><a href="#finally" class="headerlink" title="finally"></a>finally</h2><p>开头的问题是js层面的，好像跟我分析的Java层并没什么卵关系。。但是读一读源码，总归没有坏处</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+            <a href="/tags/React-Native/" rel="tag"># React Native</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/04/26/记RN Android端在Mobx环境下使用FlatList导致列表错乱的问题/" rel="next" title="记一次RN Android端在Mobx环境下使用FlatList导致列表错乱的问题">
+                <i class="fa fa-chevron-left"></i> 记一次RN Android端在Mobx环境下使用FlatList导致列表错乱的问题
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/07/10/关于Android提取、备份APK/" rel="prev" title="关于Android提取、备份APK">
+                关于Android提取、备份APK <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zNjA4Ny8xMjYyMg=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="Yori Zhao(赵佳康)">
+            
+              <p class="site-author-name" itemprop="name">Yori Zhao(赵佳康)</p>
+              <p class="site-description motion-element" itemprop="description">不定时更新技术，游戏，阿尼妹脱</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives">
+              
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/zjkhiyori" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:zjkhiyori@gmail.com" target="_blank" title="E-mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Reload-debug-js-remotely罪恶滔天，弄的百姓怨声载道"><span class="nav-number">1.</span> <span class="nav-text">Reload, debug js remotely罪恶滔天，弄的百姓怨声载道</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reload"><span class="nav-number">2.</span> <span class="nav-text">Reload</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#onKeyUp"><span class="nav-number">2.1.</span> <span class="nav-text">onKeyUp</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#handleReloadJS"><span class="nav-number">2.2.</span> <span class="nav-text">handleReloadJS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#createCachedBundleFromNetworkLoader"><span class="nav-number">2.3.</span> <span class="nav-text">createCachedBundleFromNetworkLoader</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Reload总流程"><span class="nav-number">2.4.</span> <span class="nav-text">Reload总流程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Debug-JS-Remotely"><span class="nav-number">3.</span> <span class="nav-text">Debug JS Remotely</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#onKeyUp-1"><span class="nav-number">3.1.</span> <span class="nav-text">onKeyUp</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#handleReloadJS-1"><span class="nav-number">3.2.</span> <span class="nav-text">handleReloadJS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#createRemoteDebuggerBundleLoader"><span class="nav-number">3.3.</span> <span class="nav-text">createRemoteDebuggerBundleLoader</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#finally"><span class="nav-number">4.</span> <span class="nav-text">finally</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Yori Zhao(赵佳康)</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=65796617";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

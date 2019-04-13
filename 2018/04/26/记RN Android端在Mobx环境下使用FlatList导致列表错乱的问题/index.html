@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-icon-180x180.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-96x96.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-32x32.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Android,React Native,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Read the fucking ♂ source code" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="排查结果首先说下结果，以供参考github的issue有FlatList不显示的问题，表现的跟我不太一样，他们解决方案是将removeClippedSubviews={false}，我尝试了一下不适用我的场景最终找出罪魁祸首是mobx的observable变量与FlatList的data在release环境下，未关闭RN log日志所导致的冲突  解决方案1：release环境关掉日志（我是用b">
+<meta name="keywords" content="Android,React Native">
+<meta property="og:type" content="article">
+<meta property="og:title" content="记一次RN Android端在Mobx环境下使用FlatList导致列表错乱的问题">
+<meta property="og:url" content="http://yoursite.com/2018/04/26/记RN Android端在Mobx环境下使用FlatList导致列表错乱的问题/index.html">
+<meta property="og:site_name" content="Read the fucking ♂ source code">
+<meta property="og:description" content="排查结果首先说下结果，以供参考github的issue有FlatList不显示的问题，表现的跟我不太一样，他们解决方案是将removeClippedSubviews={false}，我尝试了一下不适用我的场景最终找出罪魁祸首是mobx的observable变量与FlatList的data在release环境下，未关闭RN log日志所导致的冲突  解决方案1：release环境关掉日志（我是用b">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/2018/04/26/记RN%20Android端在Mobx环境下使用FlatList导致列表错乱的问题/title.jpeg">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/4730298-252cc6c124e102f4.jpeg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/4730298-8aee73f45bf505e2.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/4730298-eb0687b8e78b93c0.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/4730298-24d4fac0c56e442f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/4730298-c129e421ac78c6a7.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/4730298-f17d8aba21012b3f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/4730298-5b20cb33eee3fd3d.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/4730298-aabfc4f46cbe3b09.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:updated_time" content="2019-03-28T13:06:27.586Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="记一次RN Android端在Mobx环境下使用FlatList导致列表错乱的问题">
+<meta name="twitter:description" content="排查结果首先说下结果，以供参考github的issue有FlatList不显示的问题，表现的跟我不太一样，他们解决方案是将removeClippedSubviews={false}，我尝试了一下不适用我的场景最终找出罪魁祸首是mobx的observable变量与FlatList的data在release环境下，未关闭RN log日志所导致的冲突  解决方案1：release环境关掉日志（我是用b">
+<meta name="twitter:image" content="http://yoursite.com/2018/04/26/记RN%20Android端在Mobx环境下使用FlatList导致列表错乱的问题/title.jpeg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/04/26/记RN Android端在Mobx环境下使用FlatList导致列表错乱的问题/">
+
+
+
+
+
+  <title>记一次RN Android端在Mobx环境下使用FlatList导致列表错乱的问题 | Read the fucking ♂ source code</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Read the fucking ♂ source code</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">每天学习新姿势</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-首页">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-标签">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-分类">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-归档">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-关于">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/04/26/记RN Android端在Mobx环境下使用FlatList导致列表错乱的问题/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Yori Zhao(赵佳康)">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Read the fucking ♂ source code">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">记一次RN Android端在Mobx环境下使用FlatList导致列表错乱的问题</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-26T17:04:07+08:00">
+                2018-04-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术/" itemprop="url" rel="index">
+                    <span itemprop="name">技术</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/04/26/记RN Android端在Mobx环境下使用FlatList导致列表错乱的问题/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count gitment-comments-count" data-xid="/2018/04/26/记RN Android端在Mobx环境下使用FlatList导致列表错乱的问题/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <img src="/2018/04/26/记RN%20Android端在Mobx环境下使用FlatList导致列表错乱的问题/title.jpeg" title="日常peropero 好久没拍塑料小人了">
+<h2 id="排查结果"><a href="#排查结果" class="headerlink" title="排查结果"></a>排查结果</h2><p>首先说下结果，以供参考<br>github的issue有FlatList不显示的问题，表现的跟我不太一样，他们解决方案是将<code>removeClippedSubviews={false}</code>，我尝试了一下不适用我的场景<br>最终找出罪魁祸首是mobx的observable变量与FlatList的data在release环境下，未关闭RN log日志所导致的冲突</p>
+<ul>
+<li>解决方案1：release环境关掉日志（我是用babel的<code>transform-remove-console</code>插件来关闭的）</li>
+<li>解决方案2：如果一定要开日志，FlatList的data不要给observable Array，给普通Array</li>
+</ul>
+<a id="more"></a>
+<h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>首先问题如下：<br>我的RN版本<code>0.54.0</code>，mobx<code>3.4.1</code>，mobx-react<code>4.3.5</code><br><img src="https://upload-images.jianshu.io/upload_images/4730298-252cc6c124e102f4.jpeg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="列表错乱现象"></p>
+<p>一个长度为两百多的数组只显示了二十三条，后面全是空白，继续往下划是一个无限空白的list，还伴随着闪屏现象，太可怕，更可怕的是debug包无此问题，release包却有，最怕排查这种问题，耗时耗力</p>
+<h2 id="解决思路"><a href="#解决思路" class="headerlink" title="解决思路"></a>解决思路</h2><p>当时第一反应是没做分页一次性加载太多数据导致的，因为没有想到这个接口会有这么多数据，一般也就十几二十条，随即进行了分页处理，然而并没有什么卵用，仍然是二十三条后就显示空白，再往后滑动闪屏，此时也没有其他头绪，这下子只能啃源码来看什么原因了，不过好在FlatList是纯js实现的，不需要再去啃Java代码了。<br>首先找到FlatList.js文件，看它的render函数</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/4730298-8aee73f45bf505e2.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="render函数"></p>
+<p>通过配置<code>legacyImplementation</code>来选择使用<code>MetroListView</code>或者<code>VirtualizedList</code>前者是老的ListView，后者就是替代老ListView的新列表组件，官方解释这个变量是用来比较性能的，一般用不着，着重看看<code>VirtualizedList</code>，view出了问题首先就看看<code>renderItem</code>方法，下图为<code>VirtualizedList</code>的<code>renderItem</code>方法</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/4730298-eb0687b8e78b93c0.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="VirtualizedList的renderItem方法"></p>
+<p>这里就只是区分了多栏与单栏列表，我的使用场景是单栏列表，这行代码就只是给FlatList使用者回传了一个info参数，再看看info参数具体，找到<code>VirtualizedList</code>的代码，再找<code>renderItem</code>这个props在哪里调用的，下图为<code>CellRenderer的render</code>方法里<code>renderItem</code>回传参数</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/4730298-24d4fac0c56e442f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="CellRenderer的render方法里renderItem回传参数"></p>
+<p>可以看到是在<code>CellRenderer</code>这个组件的render方法里调用的，传入了<code>item，index，separators</code>，我们要找的就是item，但是item是从props中拿到的，再找找<code>CellRenderer</code>在哪里使用，可以看到是在<code>_pushCells</code>方法中使用，<code>_pushCells</code>方法在<code>VirtualizedList</code>的render方法中调用，下图为<code>VirtualizedList</code>的<code>render</code>方法</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/4730298-c129e421ac78c6a7.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="VirtualizedList的render方法"></p>
+<p>cells作为<code>React.cloneElement(element,[props],[...children])</code>的第三参数，如上图代码，此时基本可以确定问题应该在这个<code>cells</code>参数上了，再回头看看<code>_pushCells</code>方法，下图为<code>VirtualizedList</code>的<code>_pushCells</code>方法</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/4730298-f17d8aba21012b3f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="VirtualizedList的_pushCells方法"></p>
+<p>可以看到item数据是来自props的<code>getItem</code>方法，这个方法传入了一个data和一个ii下标，顾名思义应该就是在取单个列表的渲染数据，这个data就是FlatList的data，我们的列表数据源，再回到调用方FlatList找到<code>getItem</code>方法，下图为<code>FlatList</code>的<code>getItem</code>方法</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/4730298-5b20cb33eee3fd3d.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="FlatList的getItem方法"></p>
+<p>这个方法只是对多栏和单栏列表取数据的逻辑做了区分，我们可以试着把取出来的数据打印出来看是否有异常，加好调试代码，再编译一个带log的release包</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/4730298-aabfc4f46cbe3b09.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="item数据"></p>
+<p>可以看到第23个都挺正常，到了24个就不正常了，到了28个直接抛出error了，加了调试日志之后还会crash了，所以这个数据源可能有问题，联想到我用的Mobx框架，传给data的是一个Observable Array，而非普通Array，猜测是Observable Array与FlatList在此环境下有冲突，随后将其替换成普通Array，然后打包，测试一切正常</p>
+<h2 id="结尾"><a href="#结尾" class="headerlink" title="结尾"></a>结尾</h2><p>当时得出结论是FlatList和Observable Array搭配使用就会在release环境出问题，但是如果是这种结果，那问题影响面就太大了，然后发现我打的release包为了方便定位bug，将<code>transform-remove-console</code>这个插件屏蔽了，打开了js日志。随后我又试着关闭日志，FlatList继续使用Observable Array，然后打包，测试一切正常，然后就经过了几番测试，基本确认了问题所在，实在有点玄学，为了定位这一个bug，打了快一天的包。。当然结论不重要，重要的是解决问题过程，以后再遇到这种问题，解决起来应该更加得心应手</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+            <a href="/tags/React-Native/" rel="tag"># React Native</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/04/26/浅析JS闭包（Closure）与函数的柯里化（Currying）/" rel="next" title="浅析JS闭包（Closure）与函数的柯里化（Currying）">
+                <i class="fa fa-chevron-left"></i> 浅析JS闭包（Closure）与函数的柯里化（Currying）
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/05/15/React Native for Android 源码解析：Reload, Debug JS Remotely做了什么？/" rel="prev" title="React Native for Android 源码解析：Reload, Debug JS Remotely具体做了什么？">
+                React Native for Android 源码解析：Reload, Debug JS Remotely具体做了什么？ <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zNjA4Ny8xMjYyMg=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="Yori Zhao(赵佳康)">
+            
+              <p class="site-author-name" itemprop="name">Yori Zhao(赵佳康)</p>
+              <p class="site-description motion-element" itemprop="description">不定时更新技术，游戏，阿尼妹脱</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives">
+              
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/zjkhiyori" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:zjkhiyori@gmail.com" target="_blank" title="E-mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#排查结果"><span class="nav-number">1.</span> <span class="nav-text">排查结果</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#问题描述"><span class="nav-number">2.</span> <span class="nav-text">问题描述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#解决思路"><span class="nav-number">3.</span> <span class="nav-text">解决思路</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#结尾"><span class="nav-number">4.</span> <span class="nav-text">结尾</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Yori Zhao(赵佳康)</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=65796617";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-icon-180x180.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-96x96.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-32x32.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="JavaScript,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Read the fucking ♂ source code" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="keywords" content="JavaScript">
+<meta property="og:type" content="article">
+<meta property="og:title" content="浅析JS闭包（Closure）与函数的柯里化（Currying）">
+<meta property="og:url" content="http://yoursite.com/2018/04/26/浅析JS闭包（Closure）与函数的柯里化（Currying）/index.html">
+<meta property="og:site_name" content="Read the fucking ♂ source code">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/2018/04/26/浅析JS闭包（Closure）与函数的柯里化（Currying）/title_background.jpg">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/4730298-eba7944d4b6cba5e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:updated_time" content="2019-03-28T13:06:27.585Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="浅析JS闭包（Closure）与函数的柯里化（Currying）">
+<meta name="twitter:image" content="http://yoursite.com/2018/04/26/浅析JS闭包（Closure）与函数的柯里化（Currying）/title_background.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/04/26/浅析JS闭包（Closure）与函数的柯里化（Currying）/">
+
+
+
+
+
+  <title>浅析JS闭包（Closure）与函数的柯里化（Currying） | Read the fucking ♂ source code</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Read the fucking ♂ source code</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">每天学习新姿势</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-首页">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-标签">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-分类">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-归档">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-关于">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/04/26/浅析JS闭包（Closure）与函数的柯里化（Currying）/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Yori Zhao(赵佳康)">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Read the fucking ♂ source code">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">浅析JS闭包（Closure）与函数的柯里化（Currying）</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-26T15:55:57+08:00">
+                2018-04-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术/" itemprop="url" rel="index">
+                    <span itemprop="name">技术</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/04/26/浅析JS闭包（Closure）与函数的柯里化（Currying）/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count gitment-comments-count" data-xid="/2018/04/26/浅析JS闭包（Closure）与函数的柯里化（Currying）/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+         <img src="/2018/04/26/浅析JS闭包（Closure）与函数的柯里化（Currying）/title_background.jpg" title="3月3号老任就要发售Switch了，还有塞尔达护航新作，然而我并没有钱买...">
+<a id="more"></a>
+<h2 id="JS闭包"><a href="#JS闭包" class="headerlink" title="JS闭包"></a>JS闭包</h2><p>闭包在程序界是一个很抽象的概念，以至于被人称为编程界的哈姆雷特，我们先来看看MDN对其的解释</p>
+<blockquote>
+<p>Closures are functions that refer to independent (free) variables (variables that are used locally, but defined in an enclosing scope). In other words, these functions ‘remember’ the environment in which they were created.</p>
+<ul>
+<li>闭包是一个函数，特指那些可以访问独立变量的函数（这种独立变量在本地使用，但是却定义在一个封闭的作用域），换句话说这类函数能够记忆创建它们时的环境</li>
+</ul>
+</blockquote>
+<p>其实我个人理解更倾向于：</p>
+<blockquote>
+<p>当嵌套函数的引用传递给了嵌套函数作用域之外的变量，或者对象的属性，此时就会形成一个闭包</p>
+</blockquote>
+<p>嗯，解释的很好，但我还是不知道这是个啥<br>那还是少废话上代码吧。。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">person</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> name = <span class="string">'ergouzi'</span>;</span><br><span class="line">  <span class="built_in">console</span>.log(name);</span><br><span class="line">&#125;</span><br><span class="line">person();</span><br><span class="line"><span class="built_in">console</span>.log(name);</span><br><span class="line">输出：</span><br><span class="line"><span class="comment">//ergouzi</span></span><br><span class="line"><span class="comment">//undefined</span></span><br></pre></td></tr></table></figure></p>
+<p>很普通的一个函数，正常理解函数与变量的思维就是：函数执行，定义变量，函数执行完毕，变量销毁。再来看看另一种写法<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">person</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> name = <span class="string">'ergouzi'</span>;</span><br><span class="line">  <span class="keyword">var</span> nameFunc = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(name);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> nameFunc;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">var</span> personFunc = person();</span><br><span class="line">personFunc();</span><br><span class="line">输出：</span><br><span class="line"><span class="comment">//ergouzi</span></span><br></pre></td></tr></table></figure></p>
+<p>可以看到，这里即使person函数执行完毕了，但是里面的name变量却没有被销毁，这里再套用开头解释的概念，应该能理解部分了吧。咱们再来验证一下这种“被记忆的独立变量”的特性<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">person</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> name = <span class="string">'ergouzi'</span>;</span><br><span class="line">  <span class="keyword">var</span> funcObj = &#123;</span><br><span class="line">    <span class="string">'nameFunc'</span>: <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">      <span class="built_in">console</span>.log(name);</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">'changeFunc'</span>: <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">      name = <span class="string">'goudanzi'</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> funcObj;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">var</span> funcObj = person();</span><br><span class="line">funcObj.changeFunc();</span><br><span class="line">funcObj.nameFunc();</span><br><span class="line">输出：</span><br><span class="line"><span class="comment">//goudanzi</span></span><br></pre></td></tr></table></figure></p>
+<p>可以看到，我们在该独立变量的作用域外部改变了它的值，所以说明相同环境里创建的闭包函数，引用的独立变量为同一份拷贝，即同一个对象。其实用chrome调试一下就能很清楚的看到闭包函数长啥样，比如我这里的闭包函数它长这样（还长得挺漂亮的）</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/4730298-eba7944d4b6cba5e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt><br>我们可以看到两个函数“changeFunc”，“nameFunc”，从他们的Scopes里面都能找到Closure并且创建环境都为person，记忆的独立变量都为“name”，</p>
+<p>再来看点哦莫西罗伊的<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;</span><br><span class="line">  setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(i)</span><br><span class="line">  &#125;, <span class="number">0</span>);</span><br><span class="line">&#125;</span><br><span class="line">输出：</span><br><span class="line"><span class="comment">//10</span></span><br><span class="line"><span class="comment">//10</span></span><br><span class="line"><span class="comment">//10</span></span><br><span class="line"><span class="comment">//10</span></span><br><span class="line"><span class="comment">//10</span></span><br><span class="line"><span class="comment">//10</span></span><br><span class="line"><span class="comment">//10</span></span><br><span class="line"><span class="comment">//10</span></span><br><span class="line"><span class="comment">//10</span></span><br><span class="line"><span class="comment">//10</span></span><br><span class="line"><span class="comment">//简要解释一下输出值，因为setTimeout是异步函数，在i=0第一次循环时只是定义了第一个定时函数而并没有执行它，待到执行第一个定时函数，但此时i的值已经变了</span></span><br></pre></td></tr></table></figure></p>
+<p>一个普通的for循环，每次循环定义了一个定时器函数，因为没有给定时器函数的句柄传参，它只能拿到i最后的值。我们换一种“闭包”一点的写法<br><figure class="highlight lisp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">for (<span class="name">var</span> i = <span class="number">0</span><span class="comment">; i &lt; 10; i++) &#123;</span></span><br><span class="line">  setTimeout(((<span class="name">j</span>) =&gt; console.log(<span class="name">j</span>))(<span class="name">i</span>), <span class="number">0</span>)<span class="comment">;</span></span><br><span class="line">&#125;</span><br><span class="line">//或者这样写</span><br><span class="line">for (<span class="name">var</span> i = <span class="number">0</span><span class="comment">; i &lt; 10; i++) &#123;</span></span><br><span class="line">  (<span class="name">j</span> =&gt; setTimeout((<span class="name">j</span>) =&gt; console.log(<span class="name">j</span>), <span class="number">0</span>))(<span class="name">i</span>)<span class="comment">;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这里用到了es6的箭头函数，想详细了解箭头函数请移步<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions" target="_blank" rel="noopener">箭头函数</a><br>这里的代码将每次循环的i值传给了一个闭包函数，此时这个闭包函数记忆了这个i的值，等到执行定时函数时，就可以正常打印出i值。</p>
+<blockquote>
+<p>参考文档<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Closures" target="_blank" rel="noopener">https://developer.mozilla.org/en-US/docs/Web/JavaScript/Closures</a></p>
+</blockquote>
+<h2 id="函数的柯里化"><a href="#函数的柯里化" class="headerlink" title="函数的柯里化"></a>函数的柯里化</h2><h3 id="什么是柯里化"><a href="#什么是柯里化" class="headerlink" title="什么是柯里化"></a>什么是柯里化</h3><p>简单来说就是参数消元，比如我有以下代码<br><figure class="highlight coffeescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="title">add</span> = <span class="params">(x, y, z)</span> =&gt;</span> x + y + z</span><br></pre></td></tr></table></figure></p>
+<p>我们可以将它进行柯里化<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">add = <span class="function"><span class="params">x</span> =&gt;</span> y =&gt; <span class="function"><span class="params">z</span> =&gt;</span> x + y + z</span><br></pre></td></tr></table></figure></p>
+<h3 id="柯里化的作用"><a href="#柯里化的作用" class="headerlink" title="柯里化的作用"></a>柯里化的作用</h3><p>柯里化后的函数有个特点就是返回了一个新的函数，我们又可以对这个新的函数进行配置然后得到另一个新的函数，可以类比为函数的”预加载”功能，有了这个功能我们可以对通用代码进行一些封装，比如封装一个简单的请求<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> requestFunc = <span class="function"><span class="params">headers</span> =&gt;</span> method =&gt; <span class="function"><span class="params">url</span> =&gt;</span> body =&gt; fetch(url, &#123;</span><br><span class="line">  method,</span><br><span class="line">  headers,</span><br><span class="line">  body,</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> request = requestFunc(&#123;</span><br><span class="line">  <span class="string">'content-Type'</span>: <span class="string">'multipart/form-data'</span>,</span><br><span class="line">  ...params,</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> postRequest = request(<span class="string">'POST'</span>);</span><br><span class="line"><span class="keyword">const</span> getRequest = request(<span class="string">'GET'</span>);</span><br><span class="line"><span class="keyword">const</span> loginRequest = postRequest(<span class="string">'https://host/package/login'</span>);</span><br><span class="line"><span class="keyword">const</span> getInfoRequest = getRequest(<span class="string">'https://host/package/user/info'</span>)</span><br><span class="line"><span class="comment">// do login</span></span><br><span class="line">loginRequest(&#123; <span class="attr">name</span>: <span class="string">'Tom'</span>, <span class="attr">password</span>: <span class="string">'123456'</span> &#125;).then(<span class="function"><span class="params">response</span> =&gt;</span> &#123;&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// get info</span></span><br><span class="line">getInfoRequest().then(<span class="function"><span class="params">response</span> =&gt;</span> &#123;&#125;)<span class="string">'</span></span><br></pre></td></tr></table></figure></p>
+<p>当然，还有其他的精彩应用场景，比如使用这种特性来进行逻辑解耦和中间件的配置，Redux的源码也使用了大量柯里化函数，比如applyMiddleWare就是传入一个柯里化函数作为中间件，来获取内部状态信息。有兴趣的可以去细细品味</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/JavaScript/" rel="tag"># JavaScript</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/04/26/记RN Android端在Mobx环境下使用FlatList导致列表错乱的问题/" rel="prev" title="记一次RN Android端在Mobx环境下使用FlatList导致列表错乱的问题">
+                记一次RN Android端在Mobx环境下使用FlatList导致列表错乱的问题 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zNjA4Ny8xMjYyMg=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="Yori Zhao(赵佳康)">
+            
+              <p class="site-author-name" itemprop="name">Yori Zhao(赵佳康)</p>
+              <p class="site-description motion-element" itemprop="description">不定时更新技术，游戏，阿尼妹脱</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives">
+              
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/zjkhiyori" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:zjkhiyori@gmail.com" target="_blank" title="E-mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#JS闭包"><span class="nav-number">1.</span> <span class="nav-text">JS闭包</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#函数的柯里化"><span class="nav-number">2.</span> <span class="nav-text">函数的柯里化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#什么是柯里化"><span class="nav-number">2.1.</span> <span class="nav-text">什么是柯里化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#柯里化的作用"><span class="nav-number">2.2.</span> <span class="nav-text">柯里化的作用</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Yori Zhao(赵佳康)</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=65796617";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
