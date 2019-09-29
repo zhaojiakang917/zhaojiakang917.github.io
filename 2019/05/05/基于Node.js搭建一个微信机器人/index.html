@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-icon-180x180.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-96x96.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-32x32.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="JavaScript,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Read the fucking ♂ source code" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="将要实现的功能 自动聊天，可以把它扔群里跟大家聊骚聊天 每日简报，给同事家人定时播报头条简报 每日天气预报，给你老婆程序猿哪来的老婆嘘寒问暖  基本架构本项目基于Wechaty，这是一个封装了微信基本事件的开源库，比如onLogin（登陆事件），onMessage（消息事件），onLogout（登出事件）等等，详细使用可参考该项目文档，有了这些事件，我们可以基于Node.js很轻松的开发一些常用功">
+<meta name="keywords" content="JavaScript">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于Node.js搭建一个微信机器人">
+<meta property="og:url" content="http://yoursite.com/2019/05/05/基于Node.js搭建一个微信机器人/index.html">
+<meta property="og:site_name" content="Read the fucking ♂ source code">
+<meta property="og:description" content="将要实现的功能 自动聊天，可以把它扔群里跟大家聊骚聊天 每日简报，给同事家人定时播报头条简报 每日天气预报，给你老婆程序猿哪来的老婆嘘寒问暖  基本架构本项目基于Wechaty，这是一个封装了微信基本事件的开源库，比如onLogin（登陆事件），onMessage（消息事件），onLogout（登出事件）等等，详细使用可参考该项目文档，有了这些事件，我们可以基于Node.js很轻松的开发一些常用功">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/2019/05/05/基于Node.js搭建一个微信机器人/login-qrcode.png">
+<meta property="og:updated_time" content="2019-08-21T08:35:35.003Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="基于Node.js搭建一个微信机器人">
+<meta name="twitter:description" content="将要实现的功能 自动聊天，可以把它扔群里跟大家聊骚聊天 每日简报，给同事家人定时播报头条简报 每日天气预报，给你老婆程序猿哪来的老婆嘘寒问暖  基本架构本项目基于Wechaty，这是一个封装了微信基本事件的开源库，比如onLogin（登陆事件），onMessage（消息事件），onLogout（登出事件）等等，详细使用可参考该项目文档，有了这些事件，我们可以基于Node.js很轻松的开发一些常用功">
+<meta name="twitter:image" content="http://yoursite.com/2019/05/05/基于Node.js搭建一个微信机器人/login-qrcode.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2019/05/05/基于Node.js搭建一个微信机器人/">
+
+
+
+
+
+  <title>基于Node.js搭建一个微信机器人 | Read the fucking ♂ source code</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Read the fucking ♂ source code</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">每天学习新姿势</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-首页">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-标签">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-分类">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-归档">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-关于">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/05/05/基于Node.js搭建一个微信机器人/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Yori Zhao(赵佳康)">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Read the fucking ♂ source code">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">基于Node.js搭建一个微信机器人</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-05-05T11:51:43+08:00">
+                2019-05-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术/" itemprop="url" rel="index">
+                    <span itemprop="name">技术</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/05/05/基于Node.js搭建一个微信机器人/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count gitment-comments-count" data-xid="/2019/05/05/基于Node.js搭建一个微信机器人/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="将要实现的功能"><a href="#将要实现的功能" class="headerlink" title="将要实现的功能"></a>将要实现的功能</h2><ul>
+<li>自动聊天，可以把它扔群里跟大家<del>聊骚</del>聊天</li>
+<li>每日简报，给同事家人定时播报头条简报</li>
+<li>每日天气预报，给你老婆<del>程序猿哪来的老婆</del>嘘寒问暖</li>
+</ul>
+<h2 id="基本架构"><a href="#基本架构" class="headerlink" title="基本架构"></a>基本架构</h2><p>本项目基于<a href="https://github.com/Chatie/wechaty" target="_blank" rel="noopener">Wechaty</a>，这是一个封装了微信基本事件的开源库，比如<code>onLogin（登陆事件）</code>，<code>onMessage（消息事件）</code>，<code>onLogout（登出事件）</code>等等，详细使用可参考该项目文档，<br>有了这些事件，我们可以基于Node.js很轻松的开发一些常用功能。</p>
+<p>本项目Node版本需要 &gt;= 10，可以自行安装nvm进行版本切换。</p>
+<p>本项目工程代码<a href="https://github.com/zjkhiyori/wechat-boy" target="_blank" rel="noopener">wechat-boy</a><br><a id="more"></a></p>
+<h2 id="编码实现"><a href="#编码实现" class="headerlink" title="编码实现"></a>编码实现</h2><h3 id="小试牛刀"><a href="#小试牛刀" class="headerlink" title="小试牛刀"></a>小试牛刀</h3><p>首先新建工程，创建一个package.json，引入要用的库<br><figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"devDependencies"</span>: &#123;</span><br><span class="line">    <span class="string">"babel-cli"</span>: <span class="string">"^6.26.0"</span>,</span><br><span class="line">    <span class="string">"babel-preset-es2015"</span>: <span class="string">"^6.24.1"</span>, <span class="comment">// es6转es5，不想写es6可以不用这两个</span></span><br><span class="line">    <span class="string">"node-schedule"</span>: <span class="string">"^1.3.2"</span>,  <span class="comment">// 定时任务</span></span><br><span class="line">    <span class="string">"qrcode-terminal"</span>: <span class="string">"^0.12.0"</span>, <span class="comment">// 打印登陆二维码</span></span><br><span class="line">    <span class="string">"rimraf"</span>: <span class="string">"^2.6.3"</span>, <span class="comment">// 终端指令工具</span></span><br><span class="line">    <span class="string">"wechaty"</span>: <span class="string">"^0.22.6"</span>, <span class="comment">// Wechaty基础库</span></span><br><span class="line">    <span class="string">"moment"</span>: <span class="string">"2.24.0"</span> <span class="comment">// 日期处理</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="string">"dependencies"</span>: &#123;</span><br><span class="line">    <span class="string">"axios"</span>: <span class="string">"^0.18.0"</span> <span class="comment">// 网络请求</span></span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></p>
+<p>然后执行npm install 或者 yarn，然后可以在index.js里简单写一个demo，<br><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> QrTerm <span class="keyword">from</span> <span class="string">'qrcode-terminal'</span>;</span><br><span class="line"></span><br><span class="line">  Wechaty.instance(&#123; name: <span class="string">'wechat-boy'</span> &#125;)</span><br><span class="line">  .on(<span class="string">'scan'</span>, <span class="function"><span class="params">qrcode</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">`onScan: <span class="subst">$&#123;qrcode&#125;</span>`</span>);</span><br><span class="line">    QrTerm.generate(qrcode);</span><br><span class="line">  &#125;)</span><br><span class="line">  .on(<span class="string">'login'</span>, <span class="function"><span class="params">user</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">`onLogin: <span class="subst">$&#123;user.name()&#125;</span>`</span>);</span><br><span class="line">  &#125;)</span><br><span class="line">  .on(<span class="string">'message'</span>, <span class="function"><span class="params">msg</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">`from <span class="subst">$&#123;msg.from().name()&#125;</span> message: <span class="subst">$&#123;msg.text()&#125;</span>`</span>)</span><br><span class="line">  &#125;)</span><br><span class="line">  .on(<span class="string">'logout'</span>, <span class="function"><span class="params">usr</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">`user <span class="subst">$&#123;user.name()&#125;</span> logout`</span>)</span><br><span class="line">  &#125;)</span><br></pre></td></tr></table></figure></p>
+<p>然后执行npm start，第一次会下载一些依赖，而且依赖很大，要等一段时间，如果实在下载不下来可能要全局FQ了，<br>可参考我另一篇<a href="http://syachiku.cn/2018/11/13/shadowsocks%E6%9C%8D%E5%8A%A1%E6%90%AD%E5%BB%BA%E4%BB%A5%E5%8F%8A%E5%85%A8%E5%B1%80%E4%BB%A3%E7%90%86" target="_blank" rel="noopener">使用proxifier全局代理</a></p>
+<p>启动成功后会打印出登陆二维码<br><img src="/2019/05/05/基于Node.js搭建一个微信机器人/login-qrcode.png" title="登陆二维码示例"></p>
+<p>扫码登陆，就可以侦听消息事件了</p>
+<h3 id="接入图灵机器人实现聊天功能"><a href="#接入图灵机器人实现聊天功能" class="headerlink" title="接入图灵机器人实现聊天功能"></a>接入图灵机器人实现聊天功能</h3><p>上一步里的回调侦听事件测试ok了后，我们就可以做点实际功能了，实现自动聊天功能只需在<code>message</code>回调里操作就行。</p>
+<p>编辑message回调方法<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">on(<span class="string">'message'</span>, <span class="keyword">async</span> (msg) =&gt; &#123;</span><br><span class="line">  <span class="keyword">if</span> (msg.self()) <span class="keyword">return</span>;</span><br><span class="line">  <span class="keyword">const</span> room = msg.room();</span><br><span class="line">  <span class="keyword">const</span> content = msg.text();</span><br><span class="line">  <span class="keyword">const</span> contact = msg.from();</span><br><span class="line">  <span class="keyword">let</span> reply;</span><br><span class="line">  <span class="keyword">if</span> (room) &#123;</span><br><span class="line">    <span class="comment">// 代表群消息</span></span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="comment">// 个人消息</span></span><br><span class="line">    reply = <span class="keyword">await</span> Service.reply(content);</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">`tuling reply: <span class="subst">$&#123;reply&#125;</span>`</span>)</span><br><span class="line">    <span class="keyword">await</span> contact.say(reply)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment">// Service.reply</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">async</span> reply(content) &#123;</span><br><span class="line">    <span class="keyword">let</span> response;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      <span class="keyword">const</span> data = <span class="keyword">await</span> <span class="keyword">this</span>.get(<span class="string">'http://www.tuling123.com/openapi/api'</span>, &#123;</span><br><span class="line">        params: &#123;</span><br><span class="line">          <span class="comment">// key需要去http://www.tuling123.com申请</span></span><br><span class="line">          key: TULING_API_KEY,</span><br><span class="line">          info: content,</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;);</span><br><span class="line">      <span class="keyword">if</span> (data.code === <span class="number">100000</span>) &#123;</span><br><span class="line">        response = data.text;</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">Error</span>(TULING_ERROR_MESSAGE);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125; <span class="keyword">catch</span> (e) &#123;</span><br><span class="line">      response = e.message;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> response;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// axios get</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">async</span> <span class="keyword">get</span>(url, params) &#123;</span><br><span class="line">    <span class="keyword">let</span> response;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      response = <span class="keyword">await</span> axios.get(url, params);</span><br><span class="line">      <span class="built_in">console</span>.log(<span class="string">'------------success-----------'</span>);</span><br><span class="line">      <span class="built_in">console</span>.log(<span class="string">`<span class="subst">$&#123;response.status&#125;</span>\n<span class="subst">$&#123;response.statusText&#125;</span>\n<span class="subst">$&#123;<span class="built_in">JSON</span>.stringify(response.data, <span class="literal">null</span>, <span class="number">2</span>)&#125;</span>\n`</span>)</span><br><span class="line">    &#125; <span class="keyword">catch</span> (e) &#123;</span><br><span class="line">      <span class="built_in">console</span>.log(<span class="string">'------------error-------------'</span>);</span><br><span class="line">      <span class="built_in">console</span>.error(e);</span><br><span class="line">      <span class="keyword">throw</span> e</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> response.data;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>加入这些逻辑，此时你的账号已经可以自动<del>聊骚</del>聊天啦</p>
+<h3 id="接入每日简报，天气功能"><a href="#接入每日简报，天气功能" class="headerlink" title="接入每日简报，天气功能"></a>接入每日简报，天气功能</h3><p>每日自动播报功能就要用到schedule任务了，这里我们使用node-schedule库，在login的回调中执行定时功能<br><figure class="highlight cs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line">import Schedule <span class="keyword">from</span> <span class="string">'node-schedule'</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> boy = Wechaty.instance(&#123; name: <span class="string">'wechat-boy'</span> &#125;);</span><br><span class="line">boy</span><br><span class="line">.<span class="keyword">on</span>(<span class="string">'login'</span>, (usr) =&gt; &#123;</span><br><span class="line">  <span class="comment">// 设置定时任务, 每天凌晨8点触发，</span></span><br><span class="line">  <span class="comment">// 每分钟的第30秒： '30 * * * * *'</span></span><br><span class="line">  <span class="comment">// 每小时的1分30秒 ：'30 1 * * * *'</span></span><br><span class="line">  <span class="comment">// 每天的1点1分30秒 ：'30 1 1 * * *'</span></span><br><span class="line">  <span class="comment">// 每月的1日1点1分30秒 ：'30 1 1 1 * *'</span></span><br><span class="line">  <span class="comment">// 每周1的1点1分30秒 ：'30 1 1 * * 1'</span></span><br><span class="line">  <span class="comment">// 详情见node_schedule文档</span></span><br><span class="line">  Schedule.scheduleJob(<span class="string">'0 0 8 * * *'</span>, <span class="keyword">async</span> () =&gt; &#123;</span><br><span class="line">    <span class="comment">// 寻找备注名称为$&#123;alias&#125;的联系人</span></span><br><span class="line">    <span class="keyword">const</span> contact = <span class="keyword">await</span> boy.Contact.find(&#123; <span class="keyword">alias</span>: `$&#123;<span class="keyword">alias</span>&#125;` &#125;)</span><br><span class="line">    <span class="keyword">await</span> contact.say(<span class="keyword">await</span> Service.getNews());</span><br><span class="line">    <span class="keyword">await</span> contact.say(<span class="keyword">await</span> Service.getWeather());</span><br><span class="line">  &#125;)</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment">// Service.getNews</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">async</span> <span class="title">getNews</span>(<span class="params"></span>)</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> msg;</span><br><span class="line">    <span class="keyword">let</span> response;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      response = <span class="keyword">await</span> <span class="keyword">this</span>.<span class="keyword">get</span>(<span class="string">'http://v.juhe.cn/toutiao/index'</span>, &#123;</span><br><span class="line">        <span class="keyword">params</span>: &#123;</span><br><span class="line">          <span class="comment">// 需要去https://www.juhe.cn/申请</span></span><br><span class="line">          key: NEWS_KEY,</span><br><span class="line">        &#125;,</span><br><span class="line">      &#125;);</span><br><span class="line">      msg = Util.handleNewsData(response);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (e) &#123;</span><br><span class="line">      console.error(e);</span><br><span class="line">      msg = <span class="string">'获取新闻失败'</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> msg;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Service.getWeather</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">async</span> <span class="title">getWeather</span>(<span class="params"></span>)</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> msg;</span><br><span class="line">    <span class="keyword">let</span> response;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      response = <span class="keyword">await</span> <span class="keyword">this</span>.<span class="keyword">get</span>(TIANQI_URL, &#123;</span><br><span class="line">        <span class="keyword">params</span>: &#123;</span><br><span class="line">          cityname: TIANQI_CITY,</span><br><span class="line">          <span class="comment">// 需要去https://www.juhe.cn/申请</span></span><br><span class="line">          key: TIANQI_KEY</span><br><span class="line">        &#125;,</span><br><span class="line">      &#125;);</span><br><span class="line">      msg = Util.handleWeatherData(response);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (e) &#123;</span><br><span class="line">      console.error(e);</span><br><span class="line">      msg = <span class="string">'获取天气失败'</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> msg;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></p>
+<p>一个简单的，拥有每日播报，自动聊天的微信机器人就实现了。</p>
+<p>完整代码<a href="https://github.com/zjkhiyori/wechat-boy" target="_blank" rel="noopener">wechat-boy</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/JavaScript/" rel="tag"># JavaScript</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/04/03/Android免root获取shell级权限实现静默卸载安装/" rel="next" title="Android免root获取shell级权限实现静默卸载安装">
+                <i class="fa fa-chevron-left"></i> Android免root获取shell级权限实现静默卸载安装
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/05/20/Okhttp，ThreadPoolExecutor源码分析大全套/" rel="prev" title="Okhttp，ThreadPoolExecutor源码分析大全套">
+                Okhttp，ThreadPoolExecutor源码分析大全套 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zNjA4Ny8xMjYyMg=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="Yori Zhao(赵佳康)">
+            
+              <p class="site-author-name" itemprop="name">Yori Zhao(赵佳康)</p>
+              <p class="site-description motion-element" itemprop="description">不定时更新技术，游戏，阿尼妹脱</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives">
+              
+                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/zjkhiyori" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:zjkhiyori@gmail.com" target="_blank" title="E-mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#将要实现的功能"><span class="nav-number">1.</span> <span class="nav-text">将要实现的功能</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#基本架构"><span class="nav-number">2.</span> <span class="nav-text">基本架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#编码实现"><span class="nav-number">3.</span> <span class="nav-text">编码实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#小试牛刀"><span class="nav-number">3.1.</span> <span class="nav-text">小试牛刀</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#接入图灵机器人实现聊天功能"><span class="nav-number">3.2.</span> <span class="nav-text">接入图灵机器人实现聊天功能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#接入每日简报，天气功能"><span class="nav-number">3.3.</span> <span class="nav-text">接入每日简报，天气功能</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Yori Zhao(赵佳康)</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=65796617";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
