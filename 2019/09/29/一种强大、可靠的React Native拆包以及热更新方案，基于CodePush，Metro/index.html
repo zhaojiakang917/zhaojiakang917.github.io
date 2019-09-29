@@ -90,7 +90,7 @@
 <meta property="og:description" content="背景需求因为需要将各业务线通过划分jsbundle的形式进行分离，以达到  各个业务包独立更新、回滚以及版本管控 增量加载，优化启动速度 优化增量更新，只对单独某一业务包增量更新  案例参考参考了携程以及各种网络版本的做法，大致总结为三种">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/9/29/16d7c673afd6d353?w=477&h=263&f=png&s=28264">
-<meta property="og:updated_time" content="2019-09-29T11:18:30.884Z">
+<meta property="og:updated_time" content="2019-09-29T11:22:31.129Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="一种强大、可靠的React Native拆包以及热更新方案，基于CodePush，Metro">
 <meta name="twitter:description" content="背景需求因为需要将各业务线通过划分jsbundle的形式进行分离，以达到  各个业务包独立更新、回滚以及版本管控 增量加载，优化启动速度 优化增量更新，只对单独某一业务包增量更新  案例参考参考了携程以及各种网络版本的做法，大致总结为三种">
@@ -455,6 +455,8 @@
 <li>notifyApplicationReady: 官方代码这个方法只会执行一次，主要用于更新之前初始化一些参数，然后缓存结果，后续调用直接返回缓存结果，所以这里我们要改造成不缓存结果，每次都执行</li>
 </ul>
 <h2 id="后续"><a href="#后续" class="headerlink" title="后续"></a>后续</h2><p>该方案主流程已经ok，多包并发更新，单包独立更新基本没有问题，现在还在边界场景以及压力测试当中，待方案健壮后再上源码做详细分析</p>
+<p>该方案同样满足自建server的需求，关于自建server可以参考：<a href="https://github.com/lisong/code-push-server" target="_blank" rel="noopener">https://github.com/lisong/code-push-server</a></p>
+<p>再次感谢开源作者的贡献</p>
 
       
     </div>
