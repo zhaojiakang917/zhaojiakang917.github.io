@@ -89,12 +89,12 @@
 <meta property="og:site_name" content="Read the fucking ♂ source code">
 <meta property="og:description" content="背景需求因为需要将各业务线通过划分jsbundle的形式进行分离，以达到  各个业务包独立更新、回滚以及版本管控 增量加载，优化启动速度 优化增量更新，只对单独某一业务包增量更新  案例参考参考了携程以及各种网络版本的做法，大致总结为三种">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/9/29/16d7c673afd6d353?w=477&h=263&f=png&s=28264">
-<meta property="og:updated_time" content="2019-09-29T11:22:31.129Z">
+<meta property="og:image" content="http://yoursite.com/2019/09/29/一种强大、可靠的React%20Native拆包以及热更新方案，基于CodePush，Metro/sample.jpg">
+<meta property="og:updated_time" content="2019-09-29T11:28:00.543Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="一种强大、可靠的React Native拆包以及热更新方案，基于CodePush，Metro">
 <meta name="twitter:description" content="背景需求因为需要将各业务线通过划分jsbundle的形式进行分离，以达到  各个业务包独立更新、回滚以及版本管控 增量加载，优化启动速度 优化增量更新，只对单独某一业务包增量更新  案例参考参考了携程以及各种网络版本的做法，大致总结为三种">
-<meta name="twitter:image" content="https://user-gold-cdn.xitu.io/2019/9/29/16d7c673afd6d353?w=477&h=263&f=png&s=28264">
+<meta name="twitter:image" content="http://yoursite.com/2019/09/29/一种强大、可靠的React%20Native拆包以及热更新方案，基于CodePush，Metro/sample.jpg">
 
 
 
@@ -405,7 +405,8 @@
 <li>基于现有的逻辑基础增加多包更新的能力，不会对其原本流程做更改</li>
 </ul>
 <p>通过阅读源码，我们可以发现，只要隔离了包下载的路径以及每个包自己的状态信息文件，然后对多包并发更新时，做一些同步处理，就可以做到多包独立更新</p>
-<p><img src="https://user-gold-cdn.xitu.io/2019/9/29/16d7c673afd6d353?w=477&amp;h=263&amp;f=png&amp;s=28264" alt><br>改造后的包存放路径如上图所示</p>
+<img src="/2019/09/29/一种强大、可靠的React%20Native拆包以及热更新方案，基于CodePush，Metro/sample.jpg">
+<p>改造后的包存放路径如上图所示</p>
 <p>app.json文件存放包的信息，由检测更新的接口返回以及本地逻辑写入的一些信息，比如hash值，下载url，更新包的版本号，bundle的相对路径(本地代码写入)等等</p>
 <p>codepush.json会记录当前包的hash值以及上一个包的hash值，用于回滚，所以正常来讲一个包会有两个版本，上一版本用于备份回滚，回滚成功后会删除掉当前版本，具体逻辑可以自行阅读了解，所以我这里总结一下改动</p>
 <h3 id="Native改动："><a href="#Native改动：" class="headerlink" title="Native改动："></a>Native改动：</h3><p>主要改动为增加pathPrefix和bundleFileName两个传参，用于分离bundle下载的路径</p>
